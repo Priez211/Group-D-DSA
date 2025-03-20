@@ -58,6 +58,38 @@ print(f"Optimal TSP route distance (DP):{min_cost}")
 print(f"Optimal TSP route:{route}")
 
 
+# Task 3: Self-Organizing Map (SOM) Approach
+
+def tsp_som(graph, num_iterations=1000, learning_rate=0.8, decay=0.99):
+    """Solves TSP using a Self-Organizing Map (SOM) approach."""
+    n = len(graph)
+    cities = np.array([(i, 0) for i in range(n)])
+    neurons = np.random.rand(n, 2) * np.max(cities)
+    
+    for i in range(num_iterations):
+        city = cities[np.random.randint(0, n)]
+        distances = np.linalg.norm(neurons - city, axis=1)
+        winner = np.argmin(distances)
+        
+        for j in range(n):
+            influence = np.exp(-np.linalg.norm(j - winner) ** 2 / (2 * (decay ** 2)))
+            neurons[j] += learning_rate * influence * (city - neurons[j])
+        
+        learning_rate *= decay
+    
+    route = np.argsort(neurons[:, 0])
+    total_distance = sum(graph[route[i]][route[i + 1]] for i in range(n - 1)) + graph[route[-1]][route[0]]
+    return route.tolist() + [route[0]], total_distance
+
+# Create graph and solve TSP using both methods
+graph = create_graph()
+best_distance_dp, best_route_dp = tsp_dynamic_programming(graph)
+best_route_som, best_distance_som = tsp_som(graph)
+print("Approximate TSP route distance (SOM):", best_distance_som)
+print("Approximate TSP route (SOM):", best_route_som)
+
+
+
 
 
     
